@@ -143,7 +143,7 @@ char *jReadSkipWhitespace( char *sp )
 	while( (*sp != '\0') && (*sp <= ' ') )
 		sp++;
 	return sp;
-};
+}
 
 
 // Find start of a token
@@ -170,7 +170,7 @@ char *jReadFindTok( char *sp, int *tokType )
 	else if( c == '*') *tokType= JREAD_QPARAM;
 	else *tokType= JREAD_ERROR;
 	return sp;
-};
+}
 
 // jReadGetString
 // - assumes next element is "string" which may include "\" sequences
@@ -208,10 +208,10 @@ char * jReadGetString( char *pJson, struct jReadElement *pElem, char quote )
 			}
 			pElem->bytelen++;
 			pJson++;
-		};
-	};
+		}
+	}
 	return pJson;
-};
+}
 
 // jReadTextLen
 // - used to identify length of element text
@@ -755,7 +755,7 @@ char *jReadTypeStrings[]={
 char *jReadTypeToString( int dataType )
 {
 	return jReadTypeStrings[ dataType ];
-};
+}
 
 char * jReadErrorStrings[]={
 	"Ok",                                       // 0
@@ -779,6 +779,6 @@ char * jReadErrorToString( int error )
 	if( (error >=0 ) && (error <= 14))
 		return jReadErrorStrings[ error ];
 	return "Unknown error";
-};
+}
 
 // end of jRead.c
