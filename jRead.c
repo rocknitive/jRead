@@ -109,11 +109,11 @@
 //       of your own. Especially note that my atof does not handle exponents.
 //
 //
-#include <stdio.h>
+#include <stddef.h>
 
 #include "jRead.h"
 
-// By default we use single quote in query strings so it's a lot easier
+// By default, we use single quote in query strings, so it's a lot easier
 // to type in code i.e.  "{'key'" instead of "{\"key\""
 //
 #ifdef JREAD_DOUBLE_QUOTE_IN_QUERY
