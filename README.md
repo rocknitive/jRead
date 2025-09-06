@@ -99,7 +99,7 @@ The helper functions make it easy to extract single values into C variables like
 jRead_string( pJson, "{'astring'", destString, MAXLEN );
 my_int= jRead_int( pJson, "{'myarray'[1" );
 my_long= jRead_long( pJson, "{'anumber'" );
-my_double= jRead_double( pJson, "{'PI'[3" );
+my_double= jRead_number( pJson, "{'PI'[3" );
 ```
 Note that the 'int' helper does some 'type coersion' - since everything is a string anyway, calling jReadInt() will always return a value: it will return 42 for the JSON 42 or "42" and returns zero for "foo". It also returns 1 for true and 0 for false or null.
 

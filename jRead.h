@@ -6,12 +6,18 @@
 // uncomment this if you really want to use double quotes in query strings instead of '
 //#define JREAD_DOUBLE_QUOTE_IN_QUERY
 
+#ifndef JREAD_SINGLE_PRECISION
+#define JREAD_FLOAT double
+#else
+#define JREAD_FLOAT float
+#endif
+
 //
 // return dataTypes:
 #define JREAD_ERROR		0		// general error, eof etc.
 #define JREAD_OBJECT	1		// "{"
 #define JREAD_ARRAY		2		// "["
-#define JREAD_STRING	3		// "string" 
+#define JREAD_STRING	3		// "string"
 #define JREAD_NUMBER	4		// number (may be -ve) int or float
 #define JREAD_BOOL		5		// true or false
 #define JREAD_NULL		6		// null
@@ -29,7 +35,7 @@
 // - structure to return JSON elements
 // - error=0 for valid returns
 //
-// *NOTES* 
+// *NOTES*
 //    the returned pValue pointer points into the passed JSON
 //    string returns are not '\0' terminated.
 //    bytelen specifies the length of the returned data pointed to by pValue
@@ -55,7 +61,7 @@ struct jReadElement{
 //    With JSON like: "{ ..., "key":"value", ... }"
 //
 //    jRead( pJson, "{'key'", &result );
-// returns with: 
+// returns with:
 //    result.dataType= JREAD_STRING, result.pValue->'value', result.bytelen=5
 //
 char *	jRead( char *pJson, char *pQuery, struct jReadElement *pResult );
@@ -68,7 +74,7 @@ char *	jRead( char *pJson, char *pQuery, struct jReadElement *pResult );
 // *!* CAUTION *!*
 // You can supply an array of integers which are indexed for each '*' in pQuery
 // however, horrid things will happen if you don't supply enough parameters
-// 
+//
 char * jReadParam( char *pJson, char *pQuery, struct jReadElement *pResult, int *queryParams );
 
 // Array Stepping function
@@ -97,14 +103,14 @@ char *jReadArrayStep( char *pJsonArray, struct jReadElement *pResult );
 
 
 #define EXPORT_OPTIONAL_FUNCTIONS
-#ifdef EXPORT_OPTIONAL_FUNCTIONS 
+#ifdef EXPORT_OPTIONAL_FUNCTIONS
 
 //------------------------------------------------------
 // Optional Helper Functions
 //
 long jRead_long( char *pJson, char *pQuery, int *queryParams );
 int jRead_int( char *pJson, char *pQuery, int *queryParams );
-double jRead_double( char *pJson, char *pQuery, int *queryParams );
+JREAD_FLOAT jRead_number( char *pJson, char *pQuery, int *queryParams );
 int jRead_string( char *pJson, char *pQuery, char *pDest, int destlen, int *queryParams );
 
 //------------------------------------------------------
@@ -118,7 +124,7 @@ char * jReadErrorToString( int error );		   	// string descibes error code
 //
 char * jRead_atoi( char *p, unsigned int *result );	// string to unsigned int
 char * jRead_atol( char *p, long *result );			// string to signed long
-char * jRead_atof( char *p, double *result);		// string to double (does not do exponents)
+char * jRead_atof( char *p, JREAD_FLOAT *result);		// string to float (does not do exponents)
 int jReadStrcmp( struct jReadElement *j1, struct jReadElement *j2 ); // compare STRING elements
 
 // copy element to '\0'-terminated buffer

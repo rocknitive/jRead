@@ -1,6 +1,6 @@
 // main.c
 //
-// Test harness command-line for jRead 
+// Test harness command-line for jRead
 //
 //
 #define _CRT_SECURE_NO_WARNINGS			// stop complaining about unsafe functions
@@ -44,7 +44,7 @@ void runExamples()
 	struct jReadElement arrayElement;
 
 	char * exampleJson=
-		"{" 
+		"{"
 		"  \"astring\": \"This is a string\",\n"
 		"  \"number1\": 42,\n"
 		"  \"number2\":  -123.45,\n"
@@ -88,7 +88,7 @@ void runExamples()
 	// examples of helper functions
 	l= jRead_long( exampleJson, "{'number1'", NULL );			// 42
 	i= jRead_int( exampleJson, "{'yes'", NULL );				// 1	(BOOL example)
-	d= jRead_double( exampleJson, "{'number2'", NULL );			// -123.45
+	d= jRead_number( exampleJson, "{'number2'", NULL );			// -123.45
 	jRead_string( exampleJson, "{'astring'", str, 16, NULL );	// "This is a strin\0" (buffer too short example)
 
 	printf("Helper Functions...\n" );
@@ -101,21 +101,21 @@ void runExamples()
 	printf("\nQueries on sub-elements and use of query parameters...\n");
 
 	// locate "anArray"...
-	jRead( exampleJson, "{'anArray'", &arrayElement );	
+	jRead( exampleJson, "{'anArray'", &arrayElement );
 	printf("  \"anArray\": = %*.*s\n\n", arrayElement.bytelen,arrayElement.bytelen, arrayElement.pValue );
 
 	// do queries within "anArray"...
 	for( i=0; i < arrayElement.elements; i++ )
 	{
 		// index the array using queryParam
-		jRead_string( (char *)arrayElement.pValue, "[*", str, 128, &i ); 
+		jRead_string( (char *)arrayElement.pValue, "[*", str, 128, &i );
 		printf("  anArray[%d] = %s\n", i, str );
 	}
 
 	// example using a parameter array
 	{
 		int params[2]={ 2, 1 };
-		jRead_string( (char *)arrayElement.pValue, "[*{*", str, 128, params ); 
+		jRead_string( (char *)arrayElement.pValue, "[*{*", str, 128, params );
 		printf("\n  anArray[%d] objectKey[%d] = \"%s\"\n", params[0], params[1], str );
 	}
 
@@ -147,12 +147,12 @@ char *pJson=
             "]"
 "}";
   jRead( pJson, "{'Numbers'", &element );    // we expect "Numbers" to be an array
-  if( element.dataType == JREAD_ARRAY ) 
+  if( element.dataType == JREAD_ARRAY )
   {
       for( i=0; i<element.elements; i++ )    // loop for no. of elements in JSON
       {
           jRead_string( pJson, "{'Numbers'[*{'Name'", people[i].Name, NAMELEN, &i );
-          people[i].Number= jRead_long( pJson, "{'Numbers'[*{'Ident'", &i ); 
+          people[i].Number= jRead_long( pJson, "{'Numbers'[*{'Ident'", &i );
       }
   }
   i=0;
@@ -201,7 +201,7 @@ unsigned long readFileBuffer( char *filename, struct FileBuffer *pbuf, unsigned 
 	pbuf->data= (unsigned char *)malloc( pbuf->length + 1 );
 	memset( pbuf->data, 0, pbuf->length+1 );	// +1 guarantees trailing \0
 
-	i= fread( pbuf->data, pbuf->length, 1, fp );	
+	i= fread( pbuf->data, pbuf->length, 1, fp );
 	fclose( fp );
 	if( i != 1 )
 	{
@@ -245,7 +245,7 @@ void runSpeedTest()
 	DWORD tStart, tEnd;
 	double elapsed;
 	char * exampleJson=
-		"{" 
+		"{"
 		"  \"astring\": \"This is a string\",\n"
 		"  \"number1\": 42,\n"
 		"  \"number2\":  -123.45,\n"
@@ -369,7 +369,7 @@ void runLongJsonTest()
 	}
 	tEnd= GetTickCount();
 	elapsed= (double)(tEnd-tStart);
-	printf("\n...Done in %3.2lf secs (av. %3.2lf mS per %d elements read, %3.2lf uS/element)\n\n", 
+	printf("\n...Done in %3.2lf secs (av. %3.2lf mS per %d elements read, %3.2lf uS/element)\n\n",
 			elapsed/1000.0, elapsed/1000.0, arrayElement.elements,
 			elapsed/(double)arrayElement.elements);
 	printf("Done\n\n");
@@ -439,4 +439,3 @@ int main(int argc, char * argv[])
 	freeFileBuffer( &json );
 	return 0;
 }
-

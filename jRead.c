@@ -1,4 +1,4 @@
-// jRead.cpp 
+// jRead.cpp
 // Version 1v6
 //
 // jRead - an in-place JSON element reader
@@ -75,7 +75,7 @@
 // Optional Helper functions:
 //		long	jRead_long( char *pJson, char *pQuery );
 //		int		jRead_int( char *pJson, char *pQuery );
-//		double	jRead_double( char *pJson, char *pQuery );
+//		double	jRead_number( char *pJson, char *pQuery );
 //		int		jRead_string( char *pJson, char *pQuery, char *pDest, int destlen );
 //
 // Optional String output Functions
@@ -84,9 +84,9 @@
 //
 // *NEW* in 1v2
 // - "{NUMBER" returns the "key" value at that index within an object
-// - jReadParam() adds queryParams which can be used as indexes into arrays (or into 
+// - jReadParam() adds queryParams which can be used as indexes into arrays (or into
 //   objects to return key values) by specifying '*' in the query string
-//   e.g. jReadParam( pJson, "[*", &result, &index ) 
+//   e.g. jReadParam( pJson, "[*", &result, &index )
 // *NEW in 1v4
 // - fixed a couple of error return values
 // - added #define JREAD_DOUBLE_QUOTE_IN_QUERY
@@ -95,7 +95,7 @@
 // *NEW* in 1v6  (24sep2016)
 // - fixed handling of empty arrays and objects
 //
-// TonyWilk, 24sep2016 
+// TonyWilk, 24sep2016
 // mail at tonywilk . co .uk
 //
 // License: "Free as in You Owe Me a Beer"
@@ -134,7 +134,7 @@ char *	jReadCountObject( char *pJson, struct jReadElement *pResult, int keyIndex
 char *	jReadCountArray( char *pJson, struct jReadElement *pResult );
 char *	jRead_atoi( char *p, unsigned int *result );
 char *	jRead_atol( char *p, long *result );
-char *	jRead_atof( char *p, double *result);
+char *	jRead_atof( char *p, JREAD_FLOAT *result);
 
 //=======================================================
 
@@ -161,7 +161,7 @@ char *jReadFindTok( char *sp, int *tokType )
 	else if( c == '-') *tokType= JREAD_NUMBER;
 	else if( c == '{') *tokType= JREAD_OBJECT;
 	else if( c == '[') *tokType= JREAD_ARRAY;
-	else if( c == '}') *tokType= JREAD_EOBJECT; 
+	else if( c == '}') *tokType= JREAD_EOBJECT;
 	else if( c == ']') *tokType= JREAD_EARRAY;
 	else if((c == 't') || (c == 'f')) *tokType= JREAD_BOOL;
 	else if( c == 'n') *tokType= JREAD_NULL;
@@ -238,7 +238,7 @@ int jReadTextLen( char *pJson )
 int jReadStrcmp( struct jReadElement *j1, struct jReadElement *j2 )
 {
 	int i;
-	if( (j1->dataType != JREAD_STRING) || 
+	if( (j1->dataType != JREAD_STRING) ||
 		(j2->dataType != JREAD_STRING) ||
 		(j1->bytelen != j2->bytelen ) )
 		return 1;
@@ -246,7 +246,7 @@ int jReadStrcmp( struct jReadElement *j1, struct jReadElement *j2 )
 	for( i=0; i< j1->bytelen; i++ )
 		if( ((char *)(j1->pValue))[i] != ((char *)(j2->pValue))[i] )
 			return 1;
-	return 0; 
+	return 0;
 }
 
 // read unsigned int from string
@@ -289,9 +289,9 @@ char * jRead_atol( char *p, long *result )
 // *CAUTION* does not handle exponents
 //
 //
-char * jRead_atof( char *p, double *result)
+char * jRead_atof( char *p, JREAD_FLOAT *result)
 {
-    double sign, value;
+    JREAD_FLOAT sign, value;
 
     // Get sign, if any.
     sign = 1.0;
@@ -310,7 +310,7 @@ char * jRead_atof( char *p, double *result)
 
     // Get digits after decimal point, if any.
     if (*p == '.') {
-        double pow10 = 10.0;
+        JREAD_FLOAT pow10 = 10.0;
         p += 1;
         while (valid_digit(*p)) {
             value += (*p - '0') / pow10;
@@ -361,7 +361,7 @@ char * jReadCountObject( char *pJson, struct jReadElement *pResult, int keyIndex
 	pResult->elements= 0;
 	pResult->pValue= pJson;
 	sp= jReadFindTok( pJson+1, &jTok ); // check for empty object
-	if( jTok == JREAD_EOBJECT )		
+	if( jTok == JREAD_EOBJECT )
 	{
 		pJson= sp+1;
 	}else
@@ -431,7 +431,7 @@ char * jReadCountArray( char *pJson, struct jReadElement *pResult )
 	pResult->elements= 0;
 	pResult->pValue= pJson;
 	sp= jReadFindTok( pJson+1, &jTok ); // check for empty array
-	if( jTok == JREAD_EARRAY )		
+	if( jTok == JREAD_EARRAY )
 	{
 		pJson= sp+1;
 	}else
@@ -525,7 +525,7 @@ char * jReadParam( char *pJson, char *pQuery, struct jReadElement *pResult, int 
 
 	case JREAD_OBJECT:		// "{"
 		if( qTok == JREAD_EOL )
-			return jReadCountObject( pJson, pResult, -1 );	// return length of object 
+			return jReadCountObject( pJson, pResult, -1 );	// return length of object
 
 		pQuery= jReadFindTok( ++pQuery, &qTok );			// "('key'...", "{NUMBER", "{*" or EOL
 		if( qTok != JREAD_STRING )
@@ -592,13 +592,13 @@ char * jReadParam( char *pJson, char *pQuery, struct jReadElement *pResult, int 
 		// read index, skip values 'til index
 		//
 		if( qTok == JREAD_EOL )
-			return jReadCountArray( pJson, pResult );	// return length of object 
+			return jReadCountArray( pJson, pResult );	// return length of object
 
 		index= 0;
 		pQuery= jReadFindTok( ++pQuery, &qTok );		// "[NUMBER" or "[*"
-		if( qTok == JREAD_NUMBER )		
+		if( qTok == JREAD_NUMBER )
 		{
-			pQuery= jRead_atoi( pQuery, &index );		// get array index	
+			pQuery= jRead_atoi( pQuery, &index );		// get array index
 		}else if( qTok == JREAD_QPARAM )
 		{
 			pQuery++;
@@ -614,7 +614,7 @@ char * jReadParam( char *pJson, char *pQuery, struct jReadElement *pResult, int 
 			pJson= jRead( ++pJson, "", &jElement );
 			if( pResult->error )
 				break;
-			count++;				
+			count++;
 			pJson= jReadFindTok( pJson, &jTok );			// , or ]
 			if( jTok == JREAD_EARRAY )
 			{
@@ -628,7 +628,7 @@ char * jReadParam( char *pJson, char *pQuery, struct jReadElement *pResult, int 
 			}
 		}
 		break;
-	case JREAD_STRING:		// "string" 
+	case JREAD_STRING:		// "string"
 		pJson= jReadGetString( pJson, pResult, '\"' );
 		break;
 	case JREAD_NUMBER:		// number (may be -ve) int or float
@@ -667,10 +667,10 @@ char * jReadParam( char *pJson, char *pQuery, struct jReadElement *pResult, int 
 //
 // Note: by default, pass NULL for queryParams
 //       unless you are using '*' in the query for indexing
-// 
+//
 
 // jRead_long
-// - reads signed long value from JSON 
+// - reads signed long value from JSON
 // - returns number from NUMBER or STRING elements (if possible)
 //   returns 1 or 0 from BOOL elements
 //   otherwise returns 0
@@ -694,15 +694,15 @@ int jRead_int( char *pJson, char *pQuery, int *queryParams )
 	return (int)jRead_long( pJson, pQuery, queryParams );
 }
 
-// jRead_double
+// jRead_number
 // - returns double from JSON
 // - returns number from NUMBER or STRING elements
 //   otherwise returns 0.0
 //
-double jRead_double( char *pJson, char *pQuery, int *queryParams )
+JREAD_FLOAT jRead_number( char *pJson, char *pQuery, int *queryParams )
 {
 	struct jReadElement elem;
-	double result;
+	JREAD_FLOAT result;
 	jReadParam( pJson, pQuery, &elem, queryParams );
 	if( elem.dataType == JREAD_ERROR )
 		return 0.0;
