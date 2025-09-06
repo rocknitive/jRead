@@ -5,13 +5,11 @@
 //
 #define _CRT_SECURE_NO_WARNINGS			// stop complaining about unsafe functions
 
-#include <windows.h>
-
 #include <stdlib.h>
 #include <stdio.h>
 #include <malloc.h>
 #include <string.h>
-
+#include <time.h>
 
 #include "jRead.h"
 
@@ -28,7 +26,7 @@ void testQuery( char * pJson, char *query )
 	printf( " dataType = %s\n", jReadTypeToString(jElement.dataType) );
 	printf( " elements = %d\n", jElement.elements );
 	printf( " bytelen  = %d\n", jElement.bytelen );
-	printf( " value    = %*.*s\n\n", jElement.bytelen,jElement.bytelen, jElement.pValue );
+	printf( " value    = %*.*s\n\n", jElement.bytelen,jElement.bytelen, (char*)jElement.pValue );
 }
 
 //=================================================================
@@ -233,6 +231,13 @@ unsigned int fast_atoi( char *p )
     return x;
 };
 
+// Helper function to get current time in milliseconds
+// Replaces Windows-specific GetTickCount()
+unsigned long get_time_ms(void)
+{
+    return (unsigned long)(clock() * 1000 / CLOCKS_PER_SEC);
+}
+
 
 //====================================================================================
 //
@@ -242,7 +247,7 @@ void runSpeedTest()
 {
 	char linebuf[128];
 	long runs=100000;
-	DWORD tStart, tEnd;
+	unsigned long tStart, tEnd;
 	double elapsed;
 	char * exampleJson=
 		"{"
@@ -267,19 +272,19 @@ void runSpeedTest()
 	printf("we run this query: jRead_int( exampleJson, \"%s\", NULL)\n", exampleQuery );
 
 	printf("\nEnter no. of times to run query (default=100000): " );
-	gets( linebuf );
+	fgets( linebuf, sizeof(linebuf), stdin );
 	sscanf( linebuf, "%ld", &runs );
 
 	printf("Running %ld times... ", runs );
 
-	tStart= GetTickCount();
+	tStart= get_time_ms();
 	for( i=0; i<runs; i++ )
 	{
 		value= jRead_int( exampleJson, exampleQuery, NULL );
 		if( value != 1234 )
 			printf(" Big FAIL!" );
 	}
-	tEnd= GetTickCount();
+	tEnd= get_time_ms();
 	elapsed= (double)(tEnd-tStart);
 	printf("\n...Done in %3.2lf secs (av. %3.2lf uS/query)\n\n", elapsed/1000.0, (elapsed*1000.0)/(double)runs );
 
@@ -301,7 +306,7 @@ void runLongJsonTest()
 	char *query= "[*{'Users'";
 	int i;
 	char *pJsonArray;
-	DWORD tStart, tEnd;
+	unsigned long tStart, tEnd;
 	double elapsed;
 	int *UserCounts;
 
@@ -315,10 +320,10 @@ void runLongJsonTest()
 	// identify the whole JSON element
 
 	printf("Identifying the whole of the JSON 1000 times...");
-	tStart= GetTickCount();
+	tStart= get_time_ms();
 	for( i=0; i<1000; i++ )
 		jRead( (char *)json.data, "", &arrayElement );
-	tEnd= GetTickCount();
+	tEnd= get_time_ms();
 	elapsed= (double)(tEnd-tStart);
 	printf("\n...Done in %3.2lf secs (av. %3.2lf mS per run)\n", elapsed/1000.0, elapsed/1000.0 );
 	printf("JSON is array of %d elements\n\n", arrayElement.elements );
@@ -328,7 +333,7 @@ void runLongJsonTest()
 
 
 	printf("Starting %d separate \"%s\"queries... ", arrayElement.elements, query );
-	tStart= GetTickCount();
+	tStart= get_time_ms();
 	// perform query on JSON file
 	// - access each array by indexing
 	//
@@ -336,7 +341,7 @@ void runLongJsonTest()
 	{
 		UserCounts[i]= jRead_int( (char *)json.data, query, &i  );
 	}
-	tEnd= GetTickCount();
+	tEnd= get_time_ms();
 	elapsed= (double)(tEnd-tStart);
 	printf("\n...Done in %3.2lf secs (av. %3.2lf mS/query)\n\n", elapsed/1000.0, elapsed/(double)arrayElement.elements );
 
@@ -346,7 +351,7 @@ void runLongJsonTest()
 
 	printf("Now using jReadArrayStep()...\n");
 	printf("Perform the %d-steps thru array 1000 times...", arrayElement.elements);
-	tStart= GetTickCount();
+	tStart= get_time_ms();
 	for( i=0; i<1000; i++ )
 	{
 		// identify the whole JSON element
@@ -367,7 +372,7 @@ void runLongJsonTest()
 			}
 		}
 	}
-	tEnd= GetTickCount();
+	tEnd= get_time_ms();
 	elapsed= (double)(tEnd-tStart);
 	printf("\n...Done in %3.2lf secs (av. %3.2lf mS per %d elements read, %3.2lf uS/element)\n\n",
 			elapsed/1000.0, elapsed/1000.0, arrayElement.elements,
