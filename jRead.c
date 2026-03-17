@@ -294,9 +294,9 @@ char * jRead_atof( char *p, JREAD_FLOAT *result)
     JREAD_FLOAT sign, value;
 
     // Get sign, if any.
-    sign = 1.0;
+    sign = 1;
     if (*p == '-') {
-        sign = -1.0;
+        sign = -1;
         p += 1;
 
     } else if (*p == '+') {
@@ -304,17 +304,17 @@ char * jRead_atof( char *p, JREAD_FLOAT *result)
     }
 
     // Get digits before decimal point or exponent, if any.
-    for (value = 0.0; valid_digit(*p); p += 1) {
-        value = value * 10.0 + (*p - '0');
+    for (value = 0; valid_digit(*p); p += 1) {
+        value = value * 10 + (*p - '0');
     }
 
     // Get digits after decimal point, if any.
     if (*p == '.') {
-        JREAD_FLOAT pow10 = 10.0;
+        JREAD_FLOAT pow10 = 10;
         p += 1;
         while (valid_digit(*p)) {
             value += (*p - '0') / pow10;
-            pow10 *= 10.0;
+            pow10 *= 10;
             p += 1;
         }
     }
@@ -705,7 +705,7 @@ JREAD_FLOAT jRead_number( char *pJson, char *pQuery, int *queryParams )
 	JREAD_FLOAT result;
 	jReadParam( pJson, pQuery, &elem, queryParams );
 	if( elem.dataType == JREAD_ERROR )
-		return 0.0;
+		return 0;
 	jRead_atof( (char *)elem.pValue, &result );
 	return result;
 }
